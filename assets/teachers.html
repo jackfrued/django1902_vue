@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>老师</title>
+    <style>
+        #container {
+            width: 80%;
+        }
+        .teacher {
+            width: 100%;
+            margin: 0 auto;
+            padding: 10px 0;
+            border-bottom: 1px dashed gray;
+            overflow: auto;
+        }
+        .teacher div {
+            float: left;
+        }
+        .photo {
+            height: 140px;
+            border-radius: 75px;
+            overflow: hidden;
+            margin: 50px 20px;
+        }
+        .info {
+            width: 75%;
+            margin-left: 30px;
+        }
+        .info div {
+            clear: both;
+            margin: 5px 10px;
+        }
+        .info span {
+            display: inline-block;
+            width: 40px;
+            text-align: center;
+        }
+        .info a {
+            text-decoration: none;
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>{{ name }}学科老师信息</h1>
+        <hr>
+        <div v-if="teachers.length > 0">
+            <div class="teacher" v-for="teacher in teachers">
+                <div class="photo">
+                    <img :src="getPhotoUrl(teacher.photo)" height="140" alt="">
+                </div>
+                <div class="info">
+                    <h3>{{ teacher.name }}</h3>
+                    <p>{{ teacher.detail }}</p>
+                    <p class="comment">
+                        <a href="" @click.prevent="praise(teacher.no, $event)">好评</a>
+                        (<span>{{ teacher.goodCount }}</span>)
+                        &nbsp;&nbsp;
+                        <a href="" @click.prevent="criticize(teacher.no, $event)">差评</a>
+                        (<span>{{ teacher.badCount }}</span>)
+                    </p>
+                </div>
+            </div>
+        </div>
+        <h3 v-if="teachers.length == 0">暂时没有该学科的老师信息</h3>
+        <p>
+            <a href="/">返回首页</a>
+        </p>
+    </div>
+    <script src="https://cdn.bootcss.com/vue/2.6.10/vue.min.js"></script>
+    <script>
+        const app = new Vue({
+            el: '#app',
+            data: {
+                teachers: [],
+                name: ''
+            },
+            created() {
+                fetch(`/teachers/${location.search}`)
+                    .then(resp => resp.json())
+                    .then(json => {
+                        this.teachers = json.teachers
+                        this.name = json.subject.name
+                    })
+            },
+            methods: {
+                getPhotoUrl(photo) {
+                    return `/static/${photo}`
+                },
+                praiseOrCriticize(url, target) {
+                    fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                        .then(resp => resp.json())
+                        .then(json => {
+                            if (json.code == 10001) {
+                                let span = target.nextElementSibling
+                                span.textContent = parseInt(span.textContent) + 1
+                            } else if (json.code == 10002) {
+                                alert(json.hint)
+                            } else {
+                                location.href = '/login/?backurl=' +
+                                    location.pathname + location.search
+                            }
+                        })
+                },
+                praise(tno, evt) {
+                    let url = `/praise/?tno=${tno}`
+                    let target = evt.srcElement
+                    this.praiseOrCriticize(url, target)
+                },
+                criticize(tno, evt) {
+                    let url = `/criticize/?tno=${tno}`
+                    let target = evt.srcElement
+                    this.praiseOrCriticize(url, target)
+                }
+            }
+        })
+    </script>
+</body>
+</html>

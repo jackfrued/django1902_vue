@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>学科</title>
+</head>
+<body>
+    <h1>所有学科</h1>
+    <hr>
+    <div id="app">
+        <div v-for="subject in subjects">
+            <h3>
+                <a :href="getTeachersHref(subject.no)">{{ subject.name }}</a>
+                <img v-if="subject.isHot" src="/static/images/hot.png" width="32">
+            </h3>
+            <p>{{ subject.intro }}</p>
+        </div>
+    </div>
+    <script src="https://cdn.bootcss.com/vue/2.6.10/vue.min.js"></script>
+    <script>
+        const app = new Vue({
+            el: '#app',
+            data: {
+                subjects: []
+            },
+            created() {
+                fetch('/subjects/')
+                    .then(resp => resp.json())
+                    .then(json => this.subjects = json)
+            },
+            methods: {
+                getTeachersHref(sno) {
+                    return `/static/teachers.html/?sno=${sno}`
+                }
+            }
+        })
+    </script>
+</body>
+</html>
