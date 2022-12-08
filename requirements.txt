@@ -1,5 +1,5 @@
 bpmappers==1.0.1
-certifi==2019.3.9
+certifi==2022.12.7
 chardet==3.0.4
 Django==2.1.8
 django-debug-toolbar==1.11
